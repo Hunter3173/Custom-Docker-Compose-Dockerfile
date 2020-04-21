@@ -1,0 +1,2 @@
+[app_vm]
+192.168.48.132 ansible_connection=ssh ansible_user=root ansible_ssh_pass=toor

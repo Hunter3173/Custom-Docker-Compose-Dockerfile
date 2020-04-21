@@ -1,0 +1,14 @@
+---
+- name: Install gem and gauntlt
+  gather_facts: No
+  hosts: app_vm
+  become: true
+  tasks:
+    - name:  Add script gaultl for install
+      copy:
+        src: "{{ WORKSPACE }}/install-gault.sh"
+        dest: /root/
+    - name: Execute the script for install gauntlt
+      command: sh /root/install-gault.sh
+    - name: Execute gauntlt
+      command: chdir=/root/ gauntlt-docker

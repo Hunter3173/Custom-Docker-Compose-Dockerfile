@@ -1,0 +1,47 @@
+---
+
+- hosts: app_vm
+  become: true
+  tasks:
+    - name:  Copy file with owner and permissions
+      copy:
+        src: "{{ WORKSPACE }}"
+        dest: /home/
+    - name:  Add daemon.json for allow docker to pull from insecure registry
+      copy:
+        src: "{{ WORKSPACE }}/ansible-install-docker/daemon.json"
+        dest: /etc/docker/daemon.json
+    - name: Restart service docker for apply change of daemon.json
+      service:
+        name: docker
+        state: restarted
+    - name: Create a network for pozos
+      docker_network:
+        name: network_pozos
+    - name: Deploy simple api 
+      docker_container:
+        name: pozos-api
+        hostname: pozos-api
+        image: "{{ IMAGE }}"
+        state: started
+        volumes:
+          - /home/student-list/simple_api/student_age.json:/data/student_age.json
+        ports:
+          - "4000:5000"
+        networks:
+          - name: network_pozos
+    - name: Deploy website
+      docker_container:
+        name: pozos-website
+        hostname: pozos-website 
+        image: php:apache
+        state: started
+        env:
+          USERNAME: "toto"
+          PASSWORD: "python"
+        volumes:
+          - /home/student-list/website:/var/www/html
+        ports:
+          - "8002:80"
+        networks:
+          - name: network_pozos
